@@ -1,0 +1,12 @@
+{
+  "$schema": "https://glama.ai/mcp/schema/v1.json",
+  "name": "sounnyforms-mcp",
+  "displayName": "SounnyForms",
+  "description": "Zero-API-key serverless form backend, real-time lead triage, and contact form generator for static sites, React, and JAMstack apps.",
+  "homepage": "https://forms.sounny.com",
+  "repository": "https://github.com/sounny/sounnyforms-mcp",
+  "license": "MIT",
+  "category": "communication",
+  "dockerfile": "Dockerfile",
+  "entrypoint": ["node", "server.js"]
+}
