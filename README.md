@@ -1,5 +1,7 @@
 # SounnyForms Model Context Protocol (MCP) Server
 
+[![npm version](https://img.shields.io/npm/v/sounnyforms-mcp.svg?color=cb3837)](https://www.npmjs.com/package/sounnyforms-mcp)
+[![Glama MCP Server](https://glama.ai/mcp/servers/sounny/sounnyforms-mcp/badges/score.svg)](https://glama.ai/mcp/servers/sounny/sounnyforms-mcp)
 [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![MCP Protocol](https://img.shields.io/badge/MCP-v1.0-orange.svg)](https://modelcontextprotocol.io)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18.0.0-green.svg)](https://nodejs.org)
