@@ -1,0 +1,43 @@
+{
+  "name": "sounnyforms-mcp",
+  "version": "1.0.0",
+  "description": "Official Model Context Protocol (MCP) Server for SounnyForms — Zero-API-Key Serverless Form Backend, Lead Triage & Code Generation for AI Agents",
+  "main": "server.js",
+  "bin": {
+    "sounnyforms-mcp": "./server.js"
+  },
+  "files": [
+    "server.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sounny/sounnyforms-mcp.git"
+  },
+  "homepage": "https://forms.sounny.com",
+  "bugs": {
+    "url": "https://github.com/sounny/sounnyforms-mcp/issues"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "claude-desktop",
+    "cursor",
+    "antigravity",
+    "forms",
+    "serverless-forms",
+    "contact-form",
+    "lead-generation",
+    "sounnyforms"
+  ],
+  "author": "Dr. Moulay Anwar Sounny-Slitine <sounny@gmail.com> (https://sounny.com)",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
