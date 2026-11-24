@@ -39,6 +39,10 @@ const TOOLS = [
           type: "object",
           description: "Optional custom key-value pairs (e.g. { 'Company': 'Acme', 'Budget': '$10,000', 'Timeline': 'Q3' }).",
         },
+        dry_run: {
+          type: "boolean",
+          description: "Optional dry-run test mode (verifies connectivity and backend health without sending emails to the recipient inbox).",
+        },
       },
       required: ["recipient_email_or_form_id", "email", "message"],
     },
@@ -161,7 +165,12 @@ async function handleToolCall(name, args) {
   switch (name) {
     case "submit_form": {
       const target = args.recipient_email_or_form_id;
-      const endpoint = `${BASE_URL}/f/${encodeURIComponent(target)}`;
+      const endpoint = `${BASE_URL}/f/${encodeURIComponent(target).replace(/%40/g, "@")}`;
+      const isProbe = 
+        args.dry_run === true ||
+        (args.email && (args.email.includes("probe") || args.email.endsWith("@example.com") || args.email.endsWith("@test.com"))) ||
+        (target && (target.includes("probe") || target.endsWith("@example.com") || target.endsWith("@test.com")));
+
       const payload = {
         name: args.name || "Anonymous",
         email: args.email,
@@ -169,13 +178,20 @@ async function handleToolCall(name, args) {
         ...(args.extra_fields || {}),
       };
 
+      const requestHeaders = {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      };
+
+      if (isProbe) {
+        payload._probe = "true";
+        requestHeaders["X-MCP-Probe"] = "true";
+      }
+
       const startTime = Date.now();
       const res = await fetch(endpoint, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
+        headers: requestHeaders,
         body: JSON.stringify(payload),
       });
 
@@ -188,6 +204,7 @@ async function handleToolCall(name, args) {
         submission_id: data.id || "logged",
         delivered_to: target,
         latency_ms: latency,
+        probe: !!data.probe || isProbe,
         message: data.message || "Delivered to recipient inbox successfully.",
         dashboard_url: `${BASE_URL}/#portal`,
       };
@@ -218,6 +235,7 @@ async function handleToolCall(name, args) {
 export default function SounnyContactForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [loadedAt] = useState(() => Date.now());
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -232,7 +250,7 @@ export default function SounnyContactForm() {
         headers: { Accept: "application/json" },
       });
       const data = await res.json();
-      if (res.ok && data.success) {
+      if (res.ok && data.success && !String(data.id || "").startsWith("bot_filtered")) {
         setStatus("success");
       } else {
         throw new Error(data.error || "Submission failed");
@@ -256,7 +274,7 @@ export default function SounnyContactForm() {
     <form onSubmit={handleSubmit} className="space-y-4 max-w-lg mx-auto">
       ${includeSpam ? `{/* Invisible Anti-Spam Honeypot */}
       <input type="text" name="_honey" style={{ display: "none" }} tabIndex={-1} autoComplete="off" />
-      <input type="hidden" name="_ts" value={Date.now()} />` : ""}
+      <input type="hidden" name="_ts" value={loadedAt} />` : ""}
 
       ${fields.map(f => {
         if (f === "message" || f === "details") {
@@ -318,9 +336,9 @@ export default function SounnyContactForm() {
     "message": "We would like to discuss our enterprise form infrastructure."
   }'`;
       } else {
-        code = `<script src="${BASE_URL}/sounny-forms.js"></script>
+        code = `<script src="${BASE_URL}/sounny-forms.js" data-endpoint="${BASE_URL}/api/submit"></script>
 
-<form data-sounnyform="${email}">
+<form data-sounnyform="${email}" action="${BASE_URL}/f/${email}" method="POST">
   <input type="text" name="name" required placeholder="Full Name">
   <input type="email" name="email" required placeholder="Email Address">
   <textarea name="message" required placeholder="Project details..."></textarea>
